@@ -4,10 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Wheel of Fortune</title>
-  <script type="text/javascript" src="js/Winwheel.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+  <link rel="icon" href="img/head.png">
+  <script type="text/javascript" src="js/Winwheel.min.js"></script>
+  <script type="text/javascript" src="js/sweetalert2@9.js"></script>
+  <script type="text/javascript" src="js/TweenMax.min.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/dark.css">
 </head>
 
 <body>
@@ -39,46 +42,72 @@
           </thead>
           <tbody id="prizes-list"></tbody>
         </table>
-        <button style="margin: auto"class="toggleable" onclick="changeValues()">Save</button>
+        <button style="margin: auto" class="toggleable" onclick="updatePrizeLimitsFromInput()">Save</button>
       </div>
     </div>
 
     <div class="row justify-content-center">
-      <button class="btn btn-outline-primary col-4" id="spin-button" onClick="startSpin();"> Spin </button>
+      <button class="btn btn-outline-primary col-4" id="spin-button" onClick="startSpinning();"> Spin </button>
     </div>
   </div>
   <div class="footer">
     Made with ♥ at SINFO
   </div>
 </body>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/p2.js/0.6.0/p2.min.js"></script>
 
 <style>
   .input {
-    width: 40px;
+    width: 50px;
   }
+
    .toggleable {
      display: none;
    }
 </style>
 
 <script>
+
   let prizes = {
-    0: {'id': 0, 'name': 'Abre\ncaricas', 'determinanteArtigo': "um", 'limit': 50, 'fillStyle': '#E69F00', 'times': 0},
+    0: {'id': 0, 'name': 'Bottle opener', 'determinanteArtigo': "a", 'limit': 50, 'fillStyle': '#E69F00', 'times': 0},
     1: {
       'id': 1,
-      'name': 'Bola\nanti-stress',
-      'determinanteArtigo': "uma",
+      'name': 'Anti-stress ball',
+      'determinanteArtigo': "an",
       'limit': 25,
       'fillStyle': '#00A3FF',
       'times': 0
     },
-    2: {'id': 2, 'name': 'Saco', 'determinanteArtigo': "um", 'limit': 50, 'fillStyle': '#56B4E9', 'times': 0},
-    3: {'id': 3, 'name': 'T-shirt', 'determinanteArtigo': "uma", 'limit': 20, 'fillStyle': '#CC79A7', 'times': 0},
-    4: {'id': 4, 'name': 'Rato\nGaming', 'determinanteArtigo': "um", 'limit': 2, 'fillStyle': '#07BF23', 'times': 0},
-    5: {'id': 5, 'name': 'Head\nphones', 'determinanteArtigo': "uns", 'limit': 1, 'fillStyle': '#F0E442', 'times': 0},
-    6: {'id': 6, 'name': 'Óculos\nVR', 'determinanteArtigo': "uns", 'limit': 1, 'fillStyle': '#D55E00', 'times': 0},
+    2: {'id': 2, 'name': 'Bag', 'determinanteArtigo': "a", 'limit': 50, 'fillStyle': '#56B4E9', 'times': 0},
+    3: {'id': 3, 'name': 'T-shirt', 'determinanteArtigo': "a", 'limit': 20, 'fillStyle': '#CC79A7', 'times': 0},
+    4: {'id': 4, 'name': 'Gaming Mouse', 'determinanteArtigo': "a", 'limit': 2, 'fillStyle': '#07BF23', 'times': 0},
+    5: {'id': 5, 'name': 'Head phones', 'determinanteArtigo': "a set of", 'limit': 1, 'fillStyle': '#F0E442', 'times': 0},
+    6: {'id': 6, 'name': 'VR Headset', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#D55E00', 'times': 0},
+    7: {'id': 7, 'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': 'pink', 'times': 0},
   };
+
+  let soundsList = ['sound/blonk.wav', 'sound/blonk02.wav', 'sound/blonk09.wav', 'sound/cartoon.wav', 'sound/duck.wav', 'sound/horn.mp3', 'sound/ltdd_031.mp3', 'sound/p.regilla.mp3', 'sound/raspberryfart.wav'];
+
+
+  // async function a () {
+  //   for (const sound of soundsList) {
+  //     await new Promise(r => setTimeout(r, 2000));
+  //     let audio = new Audio(sound);
+  //     audio.pause();
+  //     audio.currentTime = 0;
+  //     audio.play();
+  //   }
+  // }
+  //
+  // a();
+  
+  try {
+    // local storage
+    if(JSON.parse(window.localStorage.getItem('prizes')) != null) {
+      prizes = JSON.parse(window.localStorage.getItem('prizes'));
+    }
+  } catch (e) {
+
+  }
 
   let segments = Object.values(prizes);
   let chosenPrize;
@@ -95,9 +124,9 @@
       'type': 'spinToStop',
       'duration': 10,
       'spins': 2,
-      'callbackSound' : playSound,    // Specify function to call when sound is to be triggered.
+      'callbackSound' : playTick,    // Specify function to call when sound is to be triggered.
       'soundTrigger'  : 'pin',         // Pins trigger the sound for this animation.
-      'callbackFinished': alertPrize
+      'callbackFinished': alertPrizeAndPlaySound
     },
     'pins' :    // Display pins, and if desired specify the number.
       {
@@ -127,16 +156,18 @@
     return list[index];
   }
 
-  function startSpin() {
+  function startSpinning() {
     // Ensure that spinning can't be clicked again while already running.
     if (wheelSpinning == false) {
 
+      resetWheel();
+
       chosenPrize = choosePrize();
       chosenPrize.times += 1;
+      updateInputFromPrizeLimits();
 
       // Important thing is to set the stopAngle of the animation before stating the spin.
-      let stopAt = (chosenPrize.id + 0.5)*360/Object.values(prizes).length;
-      theWheel.animation.stopAngle = stopAt;
+      theWheel.animation.stopAngle = (chosenPrize.id + 0.5) * 360 / Object.values(prizes).length;
 
       // Begin the spin animation by calling startAnimation on the wheel object.
       theWheel.startAnimation();
@@ -147,15 +178,46 @@
     }
   }
 
-  function alertPrize() {
-    let audio = new Audio('sound/horn.mp3');
+  function chooseWinningSound() {
+    let index = Math.floor(Math.random() * soundsList.length);
+    return soundsList[index];
+  }
+
+  function alertPrizeAndPlaySound() {
+    theWheel.stopAnimation(false);
+    wheelSpinning = false;
+
+    let audio = new Audio(chooseWinningSound());
     audio.pause();
     audio.currentTime = 0;
     audio.play();
-    audio.play();
 
-    alert("Ganhaste " + chosenPrize.determinanteArtigo + " " + chosenPrize.name.replace("\n", " ").toLowerCase());
-    resetWheel()
+    Swal.fire({
+      title: 'Winner!',
+      text: `You won ${chosenPrize.determinanteArtigo} ${chosenPrize.name}!`,
+      timer: 7000,
+      icon: 'success',
+      showCloseButton: false,
+      showCancelButton: true,
+      focusConfirm: false,
+      timerProgressBar: false,
+      confirmButtonText: 'Great!',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger'
+      },
+      buttonsStyling: false,
+    }).then((result) => {
+      if (result.value) {
+        // Ok button
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // Cancel button
+        chosenPrize.times -= 1;
+        updateInputFromPrizeLimits();
+      }
+    });
+
   }
 
   function resetWheel() {
@@ -168,26 +230,37 @@
     createTable();
   }
 
-  function changeValues() {
+  function updatePrizeLimitsFromInput() {
     Object.values(prizes).forEach(prize => {
       prize.times = prize.limit - Number(document.getElementById(`input-${prize.id}`).value);
     });
-    toggleValues();
+
+    // Hide values
+    Array.from(document.getElementsByClassName('toggleable')).forEach((v) => {
+      v.style.display = "none";
+    });
+  }
+
+  function updateInputFromPrizeLimits() {
+    Object.values(prizes).forEach(prize => {
+      document.getElementById(`input-${prize.id}`).value = prize.limit - prize.times;
+    });
   }
 
   function toggleValues() {
     let values = document.getElementsByClassName('toggleable');
     Array.from(values).forEach((v) => {
-      if (v.style.display === "none") {
-        v.style.display = "block";
-      } else {
+      if (v.style.display === "block") {
         v.style.display = "none";
+      } else {
+        v.style.display = "block";
       }
     });
   }
 
-  function playSound() {
+  function playTick() {
     let audio = new Audio('sound/tick.mp3');
+
     // Stop and rewind the sound (stops it if already playing).
     audio.pause();
     audio.currentTime = 0;
@@ -195,6 +268,15 @@
     // Play the sound.
     audio.play();
   }
+
+  window.onbeforeunload = function(){
+    try {
+      window.localStorage.setItem('prizes', JSON.stringify(prizes));
+    } catch (e) {
+
+    }
+  };
+
 </script>
 
 </html>

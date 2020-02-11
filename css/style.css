@@ -2,7 +2,6 @@ body {
     background-color: #fff;
     margin: 0;
     font-family: Roboto,Helvetica Neue,Arial,Helvetica,sans-serif;
-    background: url(http://static.sinfo.org/SINFO_25/powerOnBackground.png) 100% no-repeat;
     background-position-x: 100%;
     background-position-y: center;
     background-size: auto auto;
@@ -40,7 +39,7 @@ body {
 	background-size: 438px 582px;
 	background-position: top;
 	padding: 50px;
-	padding-top:74px 
+	padding-top:74px
 }
 
 table.prizes {
