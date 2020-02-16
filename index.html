@@ -277,6 +277,12 @@
     }
   };
 
+  document.addEventListener('keydown', (e) => {
+    if (!e.repeat && e.key === "Enter") {
+      startSpinning()
+    }
+  });
+
 </script>
 
 </html>

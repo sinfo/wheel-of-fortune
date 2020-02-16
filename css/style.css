@@ -2,11 +2,6 @@ body {
     background-color: #fff;
     margin: 0;
     font-family: Roboto,Helvetica Neue,Arial,Helvetica,sans-serif;
-    background-position-x: 100%;
-    background-position-y: center;
-    background-size: auto auto;
-	background-position: 100% 0;
-	background-size: 60%;
 	min-height: 100vh;
 }
 
@@ -38,8 +33,8 @@ body {
     background-repeat: no-repeat;
 	background-size: 438px 582px;
 	background-position: top;
-	padding: 50px;
-	padding-top:74px
+	padding: 74px 50px 50px;
+	margin-bottom: 40px;
 }
 
 table.prizes {
@@ -67,16 +62,23 @@ table.prizes thead {
 }
 
 #spin-button:hover {
-	border: 0px;
+	border: 0;
 }
 
 .footer {
 	height: 100px;
 	background-color: #262627;
-	position: sticky;
+	position: absolute;
 	width: 100%;
 	bottom: 0;
 	text-align: center;
 	color: #9b9b9b;
 	padding: 40px;
+}
+
+.container {
+	display: flex;
+	flex-direction: column;
+	height: calc(100vh - 200px);
+	justify-content: space-evenly;
 }
