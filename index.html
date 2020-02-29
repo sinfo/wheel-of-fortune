@@ -2,8 +2,9 @@
 <html>
 
 <head>
-  <meta charset="UTF-8">
   <title>Wheel of Fortune</title>
+  <meta charset="UTF-8">
+  <meta name=author content="Pedro Correia">
   <link rel="icon" href="img/head.png">
   <script type="text/javascript" src="js/Winwheel.min.js"></script>
   <script type="text/javascript" src="js/sweetalert2@9.js"></script>
@@ -26,23 +27,32 @@
         <img src="img/Hacky26.png" alt="hacky" id='hacky-image' />
       </div>
 
-      <div class="col  text-center">
+      <div class="col text-center">
         <div id="wheel-canvas">
           <canvas id="canvas" width="434" height="434"></canvas>
         </div>
       </div>
 
-      <div class="col  text-center">
-        <table class="table prizes">
+      <div class="col text-center prizes-table" >
+        <table class="table">
           <thead>
             <tr>
-              <th colspan="2">Prize List</th>
-              <th onclick="toggleValues()">#</th>
+              <th colspan="2" onclick="toggleValues()" style="cursor: pointer;">Prize List</th>
+              <th colspan="2"  class="toggleable">
+              	<button onclick="updatePrizesFromInput()">Save</button>
+              </th>
             </tr>
           </thead>
-          <tbody id="prizes-list"></tbody>
+          <tbody id="prizes-list" colspan="4">
+          	<tr>
+          		<td></td>
+          		<td></td>
+          		<td></td>
+          		<td></td>
+          	</tr>
+          </tbody>
         </table>
-        <button style="margin: auto" class="toggleable" onclick="updatePrizeLimitsFromInput()">Save</button>
+        
       </div>
     </div>
 
@@ -59,17 +69,18 @@
   .input {
     width: 50px;
   }
-
-   .toggleable {
-     display: none;
-   }
+  .toggleable {
+    display: none;
+  }
 </style>
 
 <script>
 
-  let prizes = [
-    {'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#e31a1c', 'times': 0},
-    {'name': 'Mug', 'determinanteArtigo': "a", 'limit': 3, 'fillStyle': '#b2df8a', 'times': 0},
+    let prizes = [
+    //{'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#e31a1c', 'times': 0},
+    //{'name': 'Mug', 'determinanteArtigo': "a", 'limit': 3, 'fillStyle': '#b2df8a', 'times': 0},
+    {'name': 'Mãe do Regouga', 'determinanteArtigo': "a", 'limit': 99999, 'fillStyle': '#e31a1c', 'times': 0},
+    {'name': 'Mãe do Sanches', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#b2df8a', 'times': 0},
     {'name': 'Mouse Pat', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
     {
       'name': 'Anti-stress ball',
@@ -86,17 +97,19 @@
     {'name': 'T-shirt', 'determinanteArtigo': "a", 'limit': 20, 'fillStyle': '#fb9a99', 'times': 0},
   ];
 
+  let soundsList = ['sounds/cartoon.wav',
+  'sounds/doit.mp3',
+  'sounds/files.mp3',
+  'sounds/laugh.mp3',
+  'sounds/nho nho.mp3',
+  'sounds/spaguetto.mp3',
+  'sounds/crab.mp3',
+  'sounds/duck.wav',
+  'sounds/horn.mp3',
+  'sounds/nani.mp3',
+  'sounds/nyan.mp3'];
 
-  try {
-    // local storage
-    if(JSON.parse(window.localStorage.getItem('prizes')) != null) {
-      prizes = JSON.parse(window.localStorage.getItem('prizes'));
-    }
-  } catch (e) {
 
-  }
-
-  let soundsList = ['sound/blonk.wav', 'sound/files.mp3', 'sound/blonk09.wav', 'sound/cartoon.wav', 'sound/duck.wav', 'sound/horn.mp3', 'sound/ltdd_031.mp3', 'sound/p.regilla.mp3', 'sound/raspberryfart.wav'];
   let chosenPrize;
   let wheelSpinning = false;
   let theWheel = new Winwheel({
@@ -128,11 +141,14 @@
     for (var i = 0; i < prizes.length; i++) {
       document.getElementById('prizes-list').insertAdjacentHTML('beforeend', `
           <tr>
-          <td style="background-color:${prizes[i].fillStyle}"></td>
-          <td class="true">${prizes[i].name}</td>
-          <td class="true">
-            <input type="number" class="toggleable input" id="input-${i}" value="${prizes[i].limit - prizes[i].times}">
-          </td>
+	          <td style="background-color:${prizes[i].fillStyle}"></td>
+	          <td class="true" id="prize-${i}">${prizes[i].name}</td>
+	          <td class="true">
+	            <input type="text" class="toggleable input" id="text-input-${i}" value="${prizes[i].name}">
+	          </td>
+	          <td class="true">
+	            <input type="number" class="toggleable input" id="input-${i}" value="${prizes[i].limit - prizes[i].times}">
+	          </td>
           </tr>`);
     }
   }
@@ -182,10 +198,14 @@
     });
   }
 
-  function updatePrizeLimitsFromInput() {
+  function updatePrizesFromInput() {
     prizes.forEach(prize => {
       prize.times = prize.limit - Number(document.getElementById(`input-${prizes.indexOf(prize)}`).value);
+      prize.name = document.getElementById(`text-input-${prizes.indexOf(prize)}`).value;
+      document.getElementById(`prize-${prizes.indexOf(prize)}`).textContent = prize.name;
     });
+
+	toggleValues()
   }
 
   function alertPrizeAndPlaySound() {
@@ -232,16 +252,16 @@
   function toggleValues() {
     let values = document.getElementsByClassName('toggleable');
     Array.from(values).forEach((v) => {
-      if (v.style.display === "block") {
+      if (v.style.display === "revert") {
         v.style.display = "none";
       } else {
-        v.style.display = "block";
+        v.style.display = "revert";
       }
     });
   }
 
   function playTick() {
-    let audio = new Audio('sound/tick.mp3');
+    let audio = new Audio('sounds/tick.mp3');
 
     // Stop and rewind the sound (stops it if already playing).
     audio.pause();
@@ -250,14 +270,6 @@
     // Play the sound.
     audio.play();
   }
-
-  window.onbeforeunload = function(){
-    try {
-      window.localStorage.setItem('prizes', JSON.stringify(prizes));
-    } catch (e) {
-
-    }
-  };
 
   document.addEventListener('keydown', (e) => {
     if (!e.repeat && e.key === "Enter") {

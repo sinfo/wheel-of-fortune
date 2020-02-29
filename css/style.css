@@ -3,6 +3,7 @@ body {
     margin: 0;
     font-family: Roboto,Helvetica Neue,Arial,Helvetica,sans-serif;
 	min-height: 100vh;
+	overflow-x: hidden;
 }
 
 .header {
@@ -37,15 +38,23 @@ body {
 	margin-bottom: 40px;
 }
 
-table.prizes {
+th {
+	border: none !important;
+}
+
+td {
+	border: none !important;
+}
+
+table {
 	background-color: white !important;
-	width: 200px !important;
+	max-width: 20vw !important;
 	min-height: 400px;
 	font-family: Roboto,Helvetica Neue,Arial,Helvetica,sans-serif !important;
 	margin: auto;
 }
 
-table.prizes thead {
+table th {
 	background-color: #018ae6;
 	text-align: center;
 	color: white;
@@ -59,6 +68,7 @@ table.prizes thead {
 	width: 500px;
 	height: 100px;
 	font-size: 40px;
+	margin-bottom: 120px
 }
 
 #spin-button:hover {
@@ -68,7 +78,7 @@ table.prizes thead {
 .footer {
 	height: 100px;
 	background-color: #262627;
-	position: absolute;
+	position: fixed;
 	width: 100%;
 	bottom: 0;
 	text-align: center;
