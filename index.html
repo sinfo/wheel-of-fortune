@@ -79,9 +79,10 @@
     let prizes = [
     //{'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#e31a1c', 'times': 0},
     //{'name': 'Mug', 'determinanteArtigo': "a", 'limit': 3, 'fillStyle': '#b2df8a', 'times': 0},
-    {'name': 'Mãe do Regouga', 'determinanteArtigo': "a", 'limit': 99999, 'fillStyle': '#e31a1c', 'times': 0},
-    {'name': 'Mãe do Sanches', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#b2df8a', 'times': 0},
-    {'name': 'Mouse Pat', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
+    //{'name': 'Mouse Pat', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
+    {'name': 'Mãe do Regouga', 'determinanteArtigo': "a enorme", 'limit': 99999, 'fillStyle': '#e31a1c', 'times': 0},
+    {'name': 'Mãe do Sanches', 'determinanteArtigo': "a majestosa", 'limit': 5, 'fillStyle': '#b2df8a', 'times': 0},
+    {'name': 'Mãe do Pina', 'determinanteArtigo': "a dona", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
     {
       'name': 'Anti-stress ball',
       'determinanteArtigo': "an",
@@ -142,11 +143,11 @@
       document.getElementById('prizes-list').insertAdjacentHTML('beforeend', `
           <tr>
 	          <td style="background-color:${prizes[i].fillStyle}"></td>
-	          <td class="true" id="prize-${i}">${prizes[i].name}</td>
-	          <td class="true">
+	          <td id="prize-${i}">${prizes[i].name}</td>
+	          <td>
 	            <input type="text" class="toggleable input" id="text-input-${i}" value="${prizes[i].name}">
 	          </td>
-	          <td class="true">
+	          <td>
 	            <input type="number" class="toggleable input" id="input-${i}" value="${prizes[i].limit - prizes[i].times}">
 	          </td>
           </tr>`);
@@ -251,11 +252,12 @@
 
   function toggleValues() {
     let values = document.getElementsByClassName('toggleable');
+    console.log(values);
     Array.from(values).forEach((v) => {
-      if (v.style.display === "revert") {
+      if (v.style.display === "table-cell") {
         v.style.display = "none";
       } else {
-        v.style.display = "revert";
+        v.style.display = "table-cell";
       }
     });
   }
