@@ -33,26 +33,26 @@
         </div>
       </div>
 
-      <div class="col text-center prizes-table" >
+      <div class="col text-center prizes-table">
         <table class="table">
           <thead>
             <tr>
               <th colspan="2" onclick="toggleValues()" style="cursor: pointer;">Prize List</th>
-              <th colspan="2"  class="toggleable">
-              	<button onclick="updatePrizesFromInput()">Save</button>
+              <th colspan="2" class="toggleable">
+                <button onclick="updatePrizesFromInput()">Save</button>
               </th>
             </tr>
           </thead>
           <tbody id="prizes-list" colspan="4">
-          	<tr>
-          		<td></td>
-          		<td></td>
-          		<td></td>
-          		<td></td>
-          	</tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
           </tbody>
         </table>
-        
+
       </div>
     </div>
 
@@ -69,6 +69,7 @@
   .input {
     width: 50px;
   }
+
   .toggleable {
     display: none;
   }
@@ -76,7 +77,7 @@
 
 <script>
 
-    let prizes = [
+  let prizes = [
     //{'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#e31a1c', 'times': 0},
     //{'name': 'Mug', 'determinanteArtigo': "a", 'limit': 3, 'fillStyle': '#b2df8a', 'times': 0},
     //{'name': 'Mouse Pat', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
@@ -98,13 +99,6 @@
       'times': 0
     },
     {
-      'name': 'Anti-stress ball',
-      'determinanteArtigo': "a",
-      'limit': 75,
-      'fillStyle': '#1f78b4', 
-      'times': 0
-    },
-    {
       'name': 'Black T-shirt',
       'determinanteArtigo': "a",
       'limit': 50,
@@ -119,40 +113,33 @@
       'times': 0
     },
     {
-      'name': 'Pack of 2 sumol',
-      'determinanteArtigo': "a",
-      'limit': 125,
-      'fillStyle': '#ff7f00', 
-      'times': 0
-    },
-    {
-      'name': 'Pen',
-      'determinanteArtigo': "a",
-      'limit': 150,
-      'fillStyle': '#e31a1c',
-      'times': 0
-    },
-    {
-      'name': 'Redbull',
-      'determinanteArtigo': "a",
-      'limit': 250,
-      'fillStyle': '#fb9a99', 
-      'times': 0
-    },
-    {
       'name': 'Mug',
       'determinanteArtigo': "a",
       'limit': 15,
-      'fillStyle': '#cab2d6', 
+      'fillStyle': '#cab2d6',
       'times': 0
-    }, 
+    },
     {
       'name': 'TUIST Ticket',
       'determinanteArtigo': "a",
-      'limit': 2,
-      'fillStyle': '#00ff9e', 
+      'limit': 10,
+      'fillStyle': '#00ff9e',
       'times': 0
     },
+    {
+      'name': 'Uber Eats Discount',
+      'determinanteArtigo': "a",
+      'limit': 10,
+      'fillStyle': '#ff7f00',
+      'times': 0
+    },
+    {
+      'name': 'Aventura Park Voucher',
+      'determinanteArtigo': "a",
+      'limit': 3,
+      'fillStyle': '#e31a1c',
+      'times': 0
+    }
     //{'name': 'Bag', 'determinanteArtigo': "a", 'limit': 10, 'fillStyle': '#a6cee3', 'times': 0},
     //{'name': 'Lanyard', 'determinanteArtigo': "a", 'limit': 10, 'fillStyle': '#fdbf6f', 'times': 0},
     //{'name': 'Webcam cover', 'determinanteArtigo': "a", 'limit': 15, 'fillStyle': '#cab2d6', 'times': 0},
@@ -162,16 +149,16 @@
   ];
 
   let soundsList = ['sounds/cartoon.wav',
-  'sounds/doit.mp3',
-  'sounds/files.mp3',
-  'sounds/laugh.mp3',
-  'sounds/nho nho.mp3',
-  'sounds/spaguetto.mp3',
-  'sounds/crab.mp3',
-  'sounds/duck.wav',
-  'sounds/horn.mp3',
-  'sounds/nani.mp3',
-  'sounds/nyan.mp3'];
+    'sounds/doit.mp3',
+    'sounds/files.mp3',
+    'sounds/laugh.mp3',
+    'sounds/nho nho.mp3',
+    'sounds/spaguetto.mp3',
+    'sounds/crab.mp3',
+    'sounds/duck.wav',
+    'sounds/horn.mp3',
+    'sounds/nani.mp3',
+    'sounds/nyan.mp3'];
 
 
   let chosenPrize;
@@ -188,14 +175,14 @@
       'type': 'spinToStop',
       'duration': 10,
       'spins': 2,
-      'callbackSound' : playTick,    // Specify function to call when sound is to be triggered.
-      'soundTrigger'  : 'pin',         // Pins trigger the sound for this animation.
+      'callbackSound': playTick,    // Specify function to call when sound is to be triggered.
+      'soundTrigger': 'pin',         // Pins trigger the sound for this animation.
       'callbackFinished': alertPrizeAndPlaySound
     },
-    'pins' :    // Display pins, and if desired specify the number.
-      {
-        'number' : prizes.length * 2
-      }
+    'pins':    // Display pins, and if desired specify the number.
+    {
+      'number': prizes.length * 2
+    }
   });
 
   createTable();
@@ -269,7 +256,7 @@
       document.getElementById(`prize-${prizes.indexOf(prize)}`).textContent = prize.name;
     });
 
-	toggleValues()
+    toggleValues()
   }
 
   function alertPrizeAndPlaySound() {
