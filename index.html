@@ -1,363 +1,430 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Wheel of Fortune</title>
+    <meta charset="UTF-8" />
+    <meta name="author" content="Pedro Correia" />
+    <link rel="icon" href="img/head.png" />
+    <script type="text/javascript" src="js/Winwheel.min.js"></script>
+    <script type="text/javascript" src="js/sweetalert2@9.js"></script>
+    <script type="text/javascript" src="js/TweenMax.min.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/dark.css" />
+  </head>
 
-<head>
-  <title>Wheel of Fortune</title>
-  <meta charset="UTF-8">
-  <meta name=author content="Pedro Correia">
-  <link rel="icon" href="img/head.png">
-  <script type="text/javascript" src="js/Winwheel.min.js"></script>
-  <script type="text/javascript" src="js/sweetalert2@9.js"></script>
-  <script type="text/javascript" src="js/TweenMax.min.js"></script>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/dark.css">
-</head>
+  <body>
+    <div class="header">
+      <img src="img/logo-sinfo.png" alt="SINFO 25" class="SINFO-logo" />
+    </div>
 
-<body>
-  <div class='header'>
-    <img src="img/logo-sinfo.png" alt="SINFO 25" class='SINFO-logo' />
-  </div>
+    <div id="container">
+      <div class="title">Wheel of Fortune</div>
 
-  <div id="container">
-    <div class="title">Wheel of Fortune</div>
+      <div class="row align-items-center">
+        <div id="hacky" class="col text-center">
+          <img src="img/Hacky26.png" alt="hacky" id="hacky-image" />
+        </div>
 
-    <div class="row align-items-center">
-      <div id="hacky" class="col  text-center">
-        <img src="img/Hacky26.png" alt="hacky" id='hacky-image' />
-      </div>
+        <div class="col text-center">
+          <div id="wheel-canvas">
+            <canvas id="canvas" width="434" height="434"></canvas>
+          </div>
+        </div>
 
-      <div class="col text-center">
-        <div id="wheel-canvas">
-          <canvas id="canvas" width="434" height="434"></canvas>
+        <div class="col text-center prizes-table">
+          <table class="table">
+            <thead>
+              <tr>
+                <th
+                  colspan="2"
+                  onclick="toggleValues()"
+                  style="cursor: pointer"
+                >
+                  Prize List
+                </th>
+                <th colspan="2" class="toggleable">
+                  <button onclick="updatePrizesFromInput()">Save</button>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="prizes-list" colspan="4">
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="col text-center prizes-table">
-        <table class="table">
-          <thead>
-            <tr>
-              <th colspan="2" onclick="toggleValues()" style="cursor: pointer;">Prize List</th>
-              <th colspan="2" class="toggleable">
-                <button onclick="updatePrizesFromInput()">Save</button>
-              </th>
-            </tr>
-          </thead>
-          <tbody id="prizes-list" colspan="4">
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-
+      <div class="row justify-content-center">
+        <button
+          class="btn btn-outline-primary col-4"
+          id="spin-button"
+          onClick="startSpinning();"
+        >
+          Spin
+        </button>
       </div>
     </div>
+    <div class="footer">Made with ♥ at SINFO</div>
+  </body>
 
-    <div class="row justify-content-center">
-      <button class="btn btn-outline-primary col-4" id="spin-button" onClick="startSpinning();"> Spin </button>
-    </div>
-  </div>
-  <div class="footer">
-    Made with ♥ at SINFO
-  </div>
-</body>
-
-<style>
-  .input {
-    width: 50px;
-  }
-
-  .toggleable {
-    display: none;
-  }
-</style>
-
-<script>
-
-  let prizes = [
-    //{'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#e31a1c', 'times': 0},
-    //{'name': 'Mug', 'determinanteArtigo': "a", 'limit': 3, 'fillStyle': '#b2df8a', 'times': 0},
-    //{'name': 'Mouse Pat', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
-    //{'name': 'Mãe do Regouga', 'determinanteArtigo': "a enorme", 'limit': 99999, 'fillStyle': '#e31a1c', 'times': 0},
-    //{'name': 'Mãe do Sanches', 'determinanteArtigo': "a majestosa", 'limit': 5, 'fillStyle': '#b2df8a', 'times': 0},
-    //{'name': 'Mãe do Pina', 'determinanteArtigo': "a dona", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
-    {
-      'name': 'Mouse pad',
-      'determinanteArtigo': "a",
-      'limit': 4,
-      'fillStyle': '#6a3d9a',
-      'times': 0
-    },
-    {
-      'name': 'Webcam cover',
-      'determinanteArtigo': "a",
-      'limit': 29,
-      'fillStyle': '#a6cee3',
-      'times': 0
-    },
-    {
-      'name': 'Black T-shirt',
-      'determinanteArtigo': "a",
-      'limit': 15,
-      'fillStyle': '#b2df8a',
-      'times': 0
-    },
-    {
-      'name': 'White T-shirt',
-      'determinanteArtigo': "a",
-      'limit': 15,
-      'fillStyle': '#33a02c',
-      'times': 0
-    },
-    {
-      'name': 'Mug',
-      'determinanteArtigo': "a",
-      'limit': 5,
-      'fillStyle': '#cab2d6',
-      'times': 0
-    },
-    {
-      'name': 'Laptop Sleeves',
-      'determinanteArtigo': "a",
-      'limit': 3,
-      'fillStyle': '#ff33ff',
-      'times': 0
-    },
-    {
-      'name': 'Key Holder',
-      'determinanteArtigo': "a",
-      'limit': 30,
-      'fillStyle': '#ffff00',
-      'times': 0
-    },
-    {
-      'name': 'Cinema City Ticket',
-      'determinanteArtigo': "a",
-      'limit': 4,
-      'fillStyle': '#aee307',
-      'times': 0
-    },
-    {
-      'name': 'Quantum Park Ticket',
-      'determinanteArtigo': "a",
-      'limit': 36,
-      'fillStyle': '#1e6582',
-      'times': 0
-    },
-    {
-      'name': 'Pena Aventura Park Voucher',
-      'determinanteArtigo': "a",
-      'limit': 3,
-      'fillStyle': '#8d2c8c',
-      'times': 0
-    },
-    {
-      'name': 'Mission to Escape Voucher',
-      'determinanteArtigo': "a",
-      'limit': 6,
-      'fillStyle': '#bd0d57',
-      'times': 0
-    },
-    {
-      'name': 'Uber Eats Discount',
-      'determinanteArtigo': "a",
-      'limit': 10,
-      'fillStyle': '#88bbea',
-      'times': 0
+  <style>
+    .input {
+      width: 50px;
     }
 
-    //{'name': 'Bag', 'determinanteArtigo': "a", 'limit': 10, 'fillStyle': '#a6cee3', 'times': 0},
-    //{'name': 'Lanyard', 'determinanteArtigo': "a", 'limit': 10, 'fillStyle': '#fdbf6f', 'times': 0},
-    //{'name': 'Webcam cover', 'determinanteArtigo': "a", 'limit': 15, 'fillStyle': '#cab2d6', 'times': 0},
-    //{'name': 'Redbull', 'determinanteArtigo': "a", 'limit': 20, 'fillStyle': '#1f78b4', 'times': 0},
-    //{'name': '2 Knorr Pasta Pot', 'determinanteArtigo': "", 'limit': 20, 'fillStyle': '#33a02c', 'times': 0},
-    //{'name': 'T-shirt', 'determinanteArtigo': "a", 'limit': 20, 'fillStyle': '#fb9a99', 'times': 0},
-  ];
-
-  let soundsList = ['sounds/cartoon.wav',
-    'sounds/doit.mp3',
-    'sounds/files.mp3',
-    'sounds/laugh.mp3',
-    'sounds/nho nho.mp3',
-    'sounds/spaguetto.mp3',
-    'sounds/crab.mp3',
-    'sounds/duck.wav',
-    'sounds/horn.mp3',
-    'sounds/nani.mp3',
-    'sounds/nyan.mp3'];
-
-
-  let chosenPrize;
-  let wheelSpinning = false;
-  let theWheel = new Winwheel({
-    'numSegments': prizes.length,   // Specify number of segments.
-    'outerRadius': 212,      // Set radius to so wheel fits the background.
-    'innerRadius': 120,      // Set inner radius to make wheel hollow.
-    'textFontSize': 16,       // Set font size accordingly.
-    'textMargin': 0,        // Take out default margin.
-    'segments': prizes, // Define segments including colour and text.
-    'animation':               // Define spin to stop animation.
-    {
-      'type': 'spinToStop',
-      'duration': 10,
-      'spins': 2,
-      'callbackSound': playTick,    // Specify function to call when sound is to be triggered.
-      'soundTrigger': 'pin',         // Pins trigger the sound for this animation.
-      'callbackFinished': alertPrizeAndPlaySound
-    },
-    'pins':    // Display pins, and if desired specify the number.
-    {
-      'number': prizes.length * 2
+    .toggleable {
+      display: none;
     }
-  });
+  </style>
 
-  createTable();
+  <script>
+    let prizes;
+    let chosenPrize;
+    let wheelSpinning = false;
+    let theWheel;
 
-  function createTable() {
-    document.getElementById('prizes-list').innerHTML = '';
-    for (var i = 0; i < prizes.length; i++) {
-      document.getElementById('prizes-list').insertAdjacentHTML('beforeend', `
+    const initialPrizes = [
+      //{'name': 'FNAC Card', 'determinanteArtigo': "a", 'limit': 1, 'fillStyle': '#e31a1c', 'times': 0},
+      //{'name': 'Mug', 'determinanteArtigo': "a", 'limit': 3, 'fillStyle': '#b2df8a', 'times': 0},
+      //{'name': 'Mouse Pat', 'determinanteArtigo': "a", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
+      //{'name': 'Mãe do Regouga', 'determinanteArtigo': "a enorme", 'limit': 99999, 'fillStyle': '#e31a1c', 'times': 0},
+      //{'name': 'Mãe do Sanches', 'determinanteArtigo': "a majestosa", 'limit': 5, 'fillStyle': '#b2df8a', 'times': 0},
+      //{'name': 'Mãe do Pina', 'determinanteArtigo': "a dona", 'limit': 5, 'fillStyle': '#ff7f00', 'times': 0},
+      {
+        name: "Mouse pad",
+        determinanteArtigo: "a",
+        limit: 4,
+        fillStyle: "#6a3d9a",
+        times: 0,
+      },
+      {
+        name: "Webcam cover",
+        determinanteArtigo: "a",
+        limit: 29,
+        fillStyle: "#a6cee3",
+        times: 0,
+      },
+      {
+        name: "Black T-shirt",
+        determinanteArtigo: "a",
+        limit: 15,
+        fillStyle: "#b2df8a",
+        times: 0,
+      },
+      {
+        name: "White T-shirt",
+        determinanteArtigo: "a",
+        limit: 15,
+        fillStyle: "#33a02c",
+        times: 0,
+      },
+      {
+        name: "Mug",
+        determinanteArtigo: "a",
+        limit: 5,
+        fillStyle: "#cab2d6",
+        times: 0,
+      },
+      {
+        name: "Laptop Sleeves",
+        determinanteArtigo: "a",
+        limit: 3,
+        fillStyle: "#ff33ff",
+        times: 0,
+      },
+      {
+        name: "Key Holder",
+        determinanteArtigo: "a",
+        limit: 30,
+        fillStyle: "#ffff00",
+        times: 0,
+      },
+      {
+        name: "Cinema City Ticket",
+        determinanteArtigo: "a",
+        limit: 4,
+        fillStyle: "#aee307",
+        times: 0,
+      },
+      {
+        name: "Quantum Park Ticket",
+        determinanteArtigo: "a",
+        limit: 36,
+        fillStyle: "#1e6582",
+        times: 0,
+      },
+      {
+        name: "Pena Aventura Park Voucher",
+        determinanteArtigo: "a",
+        limit: 3,
+        fillStyle: "#8d2c8c",
+        times: 0,
+      },
+      {
+        name: "Mission to Escape Voucher",
+        determinanteArtigo: "a",
+        limit: 6,
+        fillStyle: "#bd0d57",
+        times: 0,
+      },
+      {
+        name: "Uber Eats Discount",
+        determinanteArtigo: "a",
+        limit: 10,
+        fillStyle: "#88bbea",
+        times: 0,
+      },
+
+      //{'name': 'Bag', 'determinanteArtigo': "a", 'limit': 10, 'fillStyle': '#a6cee3', 'times': 0},
+      //{'name': 'Lanyard', 'determinanteArtigo': "a", 'limit': 10, 'fillStyle': '#fdbf6f', 'times': 0},
+      //{'name': 'Webcam cover', 'determinanteArtigo': "a", 'limit': 15, 'fillStyle': '#cab2d6', 'times': 0},
+      //{'name': 'Redbull', 'determinanteArtigo': "a", 'limit': 20, 'fillStyle': '#1f78b4', 'times': 0},
+      //{'name': '2 Knorr Pasta Pot', 'determinanteArtigo': "", 'limit': 20, 'fillStyle': '#33a02c', 'times': 0},
+      //{'name': 'T-shirt', 'determinanteArtigo': "a", 'limit': 20, 'fillStyle': '#fb9a99', 'times': 0},
+    ];
+
+    const soundsList = [
+      "sounds/cartoon.wav",
+      "sounds/doit.mp3",
+      "sounds/files.mp3",
+      "sounds/laugh.mp3",
+      "sounds/nho nho.mp3",
+      "sounds/spaguetto.mp3",
+      "sounds/crab.mp3",
+      "sounds/duck.wav",
+      "sounds/horn.mp3",
+      "sounds/nani.mp3",
+      "sounds/nyan.mp3",
+    ];
+
+    // Function to update URL with new prize limits
+    function updateURL(prizes) {
+      const params = new URLSearchParams();
+      prizes.forEach((prize, index) => {
+        const remaining = prize.limit - prize.times;
+        if (remaining !== prize.limit) {
+          params.append(`p${index}`, remaining);
+        }
+        if (prize.name !== initialPrizes[index].name) {
+          params.append(`n${index}`, encodeURIComponent(prize.name));
+        }
+      });
+      const newUrl = `${window.location.pathname}${
+        params.toString() ? "?" + params.toString() : ""
+      }`;
+      window.history.replaceState({}, "", newUrl);
+    }
+
+    // Function to load prizes from URL
+    function loadPrizesFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      const loadedPrizes = JSON.parse(JSON.stringify(initialPrizes)); // Deep copy
+
+      loadedPrizes.forEach((prize, index) => {
+        const remaining = params.get(`p${index}`);
+        if (remaining !== null) {
+          prize.times = prize.limit - parseInt(remaining, 10);
+        }
+
+        const name = params.get(`n${index}`);
+        if (name !== null) {
+          prize.name = decodeURIComponent(name);
+        }
+      });
+
+      return loadedPrizes;
+    }
+
+    function createTable() {
+      document.getElementById("prizes-list").innerHTML = "";
+      for (var i = 0; i < prizes.length; i++) {
+        document.getElementById("prizes-list").insertAdjacentHTML(
+          "beforeend",
+          `
           <tr>
 	          <td style="background-color:${prizes[i].fillStyle}"></td>
 	          <td id="prize-${i}">${prizes[i].name}</td>
 	          <td>
-	            <input type="text" class="toggleable input" id="text-input-${i}" value="${prizes[i].name}">
+	            <input type="text" class="toggleable input" id="text-input-${i}" value="${
+            prizes[i].name
+          }">
 	          </td>
 	          <td>
-	            <input type="number" class="toggleable input" id="input-${i}" value="${prizes[i].limit - prizes[i].times}">
+	            <input type="number" class="toggleable input" id="input-${i}" value="${
+            prizes[i].limit - prizes[i].times
+          }">
 	          </td>
-          </tr>`);
+          </tr>`
+        );
+      }
     }
-  }
 
+    function startSpinning() {
+      // Ensure that spinning can't be clicked again while already running.
+      if (wheelSpinning == false) {
+        resetWheel();
 
-
-  function startSpinning() {
-    // Ensure that spinning can't be clicked again while already running.
-    if (wheelSpinning == false) {
-
-      resetWheel();
-
-      chosenPrize = choosePrize();
-      chosenPrize.times += 1;
-      updateInputFromPrizeLimits();
-
-      // Important thing is to set the stopAngle of the animation before stating the spin.
-      theWheel.animation.stopAngle = (prizes.indexOf(chosenPrize) + 0.5) * 360 / prizes.length;
-
-      // Begin the spin animation by calling startAnimation on the wheel object.
-      theWheel.startAnimation();
-
-      // Set to true so that power can't be changed and spin button re-enabled during
-      // the current animation. The user will have to reset before spinning again.
-      wheelSpinning = true;
-    }
-  }
-
-  function resetWheel() {
-    theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
-    theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
-    theWheel.animation.segments = prizes;
-    theWheel.animation.numSegments = prizes.length;
-    theWheel.draw();                // Call draw to render changes to the wheel.
-    wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
-  }
-
-  function choosePrize() {
-    let list = prizes.map(prize => Array(prize.limit - prize.times).fill(prize)).flat(1);
-    let index = Math.floor(Math.random() * list.length);
-    return list[index];
-  }
-
-  function updateInputFromPrizeLimits() {
-    prizes.forEach(prize => {
-      document.getElementById(`input-${prizes.indexOf(prize)}`).value = prize.limit - prize.times;
-    });
-  }
-
-  function updatePrizesFromInput() {
-    prizes.forEach(prize => {
-      prize.times = prize.limit - Number(document.getElementById(`input-${prizes.indexOf(prize)}`).value);
-      prize.name = document.getElementById(`text-input-${prizes.indexOf(prize)}`).value;
-      document.getElementById(`prize-${prizes.indexOf(prize)}`).textContent = prize.name;
-    });
-
-    toggleValues()
-  }
-
-  function alertPrizeAndPlaySound() {
-    theWheel.stopAnimation(false);
-    wheelSpinning = false;
-
-    let audio = new Audio(chooseWinningSound());
-    audio.pause();
-    audio.currentTime = 0;
-    audio.play();
-
-    Swal.fire({
-      title: 'Winner!',
-      text: `You won ${chosenPrize.determinanteArtigo} ${chosenPrize.name}!`,
-      timer: 7000,
-      icon: 'success',
-      showCloseButton: false,
-      showCancelButton: true,
-      focusConfirm: false,
-      timerProgressBar: false,
-      confirmButtonText: 'Great!',
-      cancelButtonText: 'Cancel',
-      customClass: {
-        confirmButton: 'btn btn-success',
-        cancelButton: 'btn btn-danger'
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.value) {
-        // Ok button
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // Cancel button
-        chosenPrize.times -= 1;
+        chosenPrize = choosePrize();
+        chosenPrize.times += 1;
         updateInputFromPrizeLimits();
+        updateURL(prizes); // Update URL with new prize limits
+
+        // Important thing is to set the stopAngle of the animation before stating the spin.
+        theWheel.animation.stopAngle =
+          ((prizes.indexOf(chosenPrize) + 0.5) * 360) / prizes.length;
+
+        // Begin the spin animation by calling startAnimation on the wheel object.
+        theWheel.startAnimation();
+
+        // Set to true so that power can't be changed and spin button re-enabled during
+        // the current animation. The user will have to reset before spinning again.
+        wheelSpinning = true;
       }
-    });
-  }
-
-  function chooseWinningSound() {
-    let index = Math.floor(Math.random() * soundsList.length);
-    return soundsList[index];
-  }
-
-  function toggleValues() {
-    let values = document.getElementsByClassName('toggleable');
-    console.log(values);
-    Array.from(values).forEach((v) => {
-      if (v.style.display === "table-cell") {
-        v.style.display = "none";
-      } else {
-        v.style.display = "table-cell";
-      }
-    });
-  }
-
-  function playTick() {
-    let audio = new Audio('sounds/tick.mp3');
-
-    // Stop and rewind the sound (stops it if already playing).
-    audio.pause();
-    audio.currentTime = 0;
-
-    // Play the sound.
-    audio.play();
-  }
-
-  document.addEventListener('keydown', (e) => {
-    if (!e.repeat && e.key === "Enter") {
-      startSpinning()
     }
-  });
 
-</script>
+    function resetWheel() {
+      theWheel.stopAnimation(false); // Stop the animation, false as param so does not call callback function.
+      theWheel.rotationAngle = 0; // Re-set the wheel angle to 0 degrees.
+      theWheel.animation.segments = prizes;
+      theWheel.animation.numSegments = prizes.length;
+      theWheel.draw(); // Call draw to render changes to the wheel.
+      wheelSpinning = false; // Reset to false to power buttons and spin can be clicked again.
+    }
 
+    function choosePrize() {
+      let list = prizes
+        .map((prize) => Array(prize.limit - prize.times).fill(prize))
+        .flat(1);
+      let index = Math.floor(Math.random() * list.length);
+      return list[index];
+    }
+
+    function updateInputFromPrizeLimits() {
+      prizes.forEach((prize) => {
+        document.getElementById(`input-${prizes.indexOf(prize)}`).value =
+          prize.limit - prize.times;
+      });
+    }
+
+    function updatePrizesFromInput() {
+      prizes.forEach((prize) => {
+        prize.times =
+          prize.limit -
+          Number(
+            document.getElementById(`input-${prizes.indexOf(prize)}`).value
+          );
+        prize.name = document.getElementById(
+          `text-input-${prizes.indexOf(prize)}`
+        ).value;
+        document.getElementById(`prize-${prizes.indexOf(prize)}`).textContent =
+          prize.name;
+      });
+
+      updateURL(prizes); // Update URL with new prize limits
+      toggleValues();
+    }
+
+    function alertPrizeAndPlaySound() {
+      theWheel.stopAnimation(false);
+      wheelSpinning = false;
+
+      let audio = new Audio(chooseWinningSound());
+      audio.pause();
+      audio.currentTime = 0;
+      audio.play();
+
+      Swal.fire({
+        title: "Winner!",
+        text: `You won ${chosenPrize.determinanteArtigo} ${chosenPrize.name}!`,
+        timer: 7000,
+        icon: "success",
+        showCloseButton: false,
+        showCancelButton: true,
+        focusConfirm: false,
+        timerProgressBar: false,
+        confirmButtonText: "Great!",
+        cancelButtonText: "Cancel",
+        customClass: {
+          confirmButton: "btn btn-success",
+          cancelButton: "btn btn-danger",
+        },
+        buttonsStyling: false,
+      }).then((result) => {
+        if (result.value) {
+          // Ok button
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          // Cancel button
+          chosenPrize.times -= 1;
+          updateURL(prizes); // Update URL with new prize limits
+          updateInputFromPrizeLimits();
+        }
+      });
+    }
+
+    function chooseWinningSound() {
+      let index = Math.floor(Math.random() * soundsList.length);
+      return soundsList[index];
+    }
+
+    function toggleValues() {
+      let values = document.getElementsByClassName("toggleable");
+      console.log(values);
+      Array.from(values).forEach((v) => {
+        if (v.style.display === "table-cell") {
+          v.style.display = "none";
+        } else {
+          v.style.display = "table-cell";
+        }
+      });
+    }
+
+    function playTick() {
+      let audio = new Audio("sounds/tick.mp3");
+
+      // Stop and rewind the sound (stops it if already playing).
+      audio.pause();
+      audio.currentTime = 0;
+
+      // Play the sound.
+      audio.play();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      prizes = loadPrizesFromURL();
+      createTable();
+      theWheel = new Winwheel({
+        numSegments: prizes.length, // Specify number of segments.
+        outerRadius: 212, // Set radius to so wheel fits the background.
+        innerRadius: 120, // Set inner radius to make wheel hollow.
+        textFontSize: 16, // Set font size accordingly.
+        textMargin: 0, // Take out default margin.
+        segments: prizes, // Define segments including colour and text.
+        // Define spin to stop animation.
+        animation: {
+          type: "spinToStop",
+          duration: 10,
+          spins: 2,
+          callbackSound: playTick, // Specify function to call when sound is to be triggered.
+          soundTrigger: "pin", // Pins trigger the sound for this animation.
+          callbackFinished: alertPrizeAndPlaySound,
+        },
+        // Display pins, and if desired specify the number.
+        pins: {
+          number: prizes.length * 2,
+        },
+      });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!e.repeat && e.key === "Enter") {
+        startSpinning();
+      }
+    });
+  </script>
 </html>
