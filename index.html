@@ -208,11 +208,8 @@
       const params = new URLSearchParams();
       prizes.forEach((prize, index) => {
         const remaining = prize.limit - prize.times;
-        if (remaining !== prize.limit) {
+        if (prize.name == initialPrizes[index].name) {
           params.append(`p${index}`, remaining);
-        }
-        if (prize.name !== initialPrizes[index].name) {
-          params.append(`n${index}`, encodeURIComponent(prize.name));
         }
       });
       const newUrl = `${window.location.pathname}${
@@ -230,11 +227,6 @@
         const remaining = params.get(`p${index}`);
         if (remaining !== null) {
           prize.times = prize.limit - parseInt(remaining, 10);
-        }
-
-        const name = params.get(`n${index}`);
-        if (name !== null) {
-          prize.name = decodeURIComponent(name);
         }
       });
 
@@ -374,7 +366,7 @@
 
     function toggleValues() {
       let values = document.getElementsByClassName("toggleable");
-      console.log(values);
+
       Array.from(values).forEach((v) => {
         if (v.style.display === "table-cell") {
           v.style.display = "none";
