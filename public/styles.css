@@ -1,0 +1,153 @@
+@font-face {
+  font-family: 'Mupen';
+  src: url('assets/fonts/mupen.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Obviously';
+  src: url('assets/fonts/obviously.otf') format('opentype');
+}
+
+* {
+  --blue: #1c2b70;
+}
+
+html, body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7f7f7;
+  color: var(--blue);
+  font-family: 'Obviously', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+svg {
+  margin-bottom: -11rem;
+}
+
+.title {
+  text-anchor: middle;
+  font-size: clamp(36px, 6vw, 58px);
+  font-family: 'Mupen', system-ui, sans-serif;
+  stroke: var(--blue);
+  stroke-width: 0.45rem;
+  paint-order: stroke fill;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 72vh) 1fr;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.mascot-link {
+  grid-column: 1;
+  align-self: end;
+  justify-self: end;
+}
+
+.hacky {
+  width: clamp(14rem, 23vw, 30rem);
+  max-width: 100%;
+  display: block;
+}
+
+.wheel {
+  grid-column: 2;
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas#wheel {
+  cursor: pointer;
+  border-radius: 50%;
+  height: min(72vh, 725px);
+  width: min(72vh, 725px);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+}
+
+.wheel-logo {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  width: clamp(58px, 18%, 105px);
+  aspect-ratio: 1 / 1;
+  height: auto;
+}
+
+#pointer {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  border-right: 60px solid #ff0000;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.card {
+  background: #fff;
+  border: 4px solid var(--blue);
+  border-radius: 8px;
+  width: 18rem;
+  max-width: 90%;
+  text-align: center;
+  padding: 1rem;
+  box-shadow: 0 6px 30px rgba(28,43,112,0.12);
+}
+
+#prize {
+  font-family: 'Mupen', system-ui, sans-serif;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 0.2rem solid transparent;
+}
+
+button#cancel_btn {
+  background: #fff;
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+button#claim_btn {
+  background: var(--blue);
+  color: #fff;
+}
+
+footer {
+  color: #444;
+  font-family: 'Mupen', system-ui, sans-serif;
+  align-self: flex-end;
+  justify-self: flex-end;
+  padding: 0.5rem 1rem;
+}

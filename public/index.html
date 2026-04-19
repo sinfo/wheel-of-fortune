@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="author" content="SINFO Dev Team"/>
+    <title>Wheel of Fortune</title>
+    <link rel="icon" href="/favicon.png" type="image/png"/>
+    <link rel="stylesheet" href="styles.css"/>
+  </head>
+
+  <body>
+    <!-- Title Text -->
+    <svg viewBox="0 0 900 180" aria-hidden="true">
+      <path id="arch" d="M60,140 Q450,10 840,140" fill="none"/>
+      <text class="title">
+        <textPath href="#arch" startOffset="50%">
+          <tspan fill="#e63946">W</tspan><!--
+          --><tspan fill="#f77f00">H</tspan><!--
+          --><tspan fill="#fcbf49">E</tspan><!--
+          --><tspan fill="#e9c46a">E</tspan><!--
+          --><tspan fill="#2a9d8f">L</tspan><!--
+          --><tspan>&#160;</tspan><!--
+          --><tspan fill="#264653">O</tspan><!--
+          --><tspan fill="#2b8a9a">F</tspan><!--
+          --><tspan>&#160;</tspan><!--
+          --><tspan fill="#8a2be2">F</tspan><!--
+          --><tspan fill="#d73b8f">O</tspan><!--
+          --><tspan fill="#ff6b6b">R</tspan><!--
+          --><tspan fill="#ffd166">T</tspan><!--
+          --><tspan fill="#4cc9f0">U</tspan><!--
+          --><tspan fill="#06d6a0">N</tspan><!--
+          --><tspan fill="#118ab2">E</tspan>
+        </textPath>
+      </text>
+    </svg>
+
+
+    <div class="grid">
+      <a href="admin.html" class="mascot-link"><img src="assets/images/hacky.png" alt="Hacky Mascot" class="hacky"/></a>
+      <div class="wheel">
+        <canvas id="wheel" width="800" height="800" tabindex="0"></canvas>
+        <img src="assets/images/power_on.png" class="wheel-logo"/>
+        <div id="pointer"></div>
+      </div>
+      <footer>Made with 💙 by SINFO's Dev Team</footer>
+    </div>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="card">
+        <p id="prize">Prize</p>
+        <div class="actions">
+          <button id="cancel_btn">Cancel</button>
+          <button id="claim_btn">Claim</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/confetti.js"></script>
+    <script src="spin.js"></script>
+  </body>
+</html>

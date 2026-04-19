@@ -1,0 +1,1031 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Wheel of Fortune</title>
+  <link rel="icon" href="/favicon.png" type="image/png" />
+  <style>
+    @font-face {
+      font-family: 'Obviously';
+      src: url('assets/fonts/obviously.otf') format('opentype');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #1c2b70;
+      --blue-light: #2d3f9e;
+      --bg: #f0f2f8;
+      --surface: #ffffff;
+      --border: #dde2f0;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --success: #16a34a;
+      --danger: #dc2626;
+    }
+
+    body {
+      font-family: 'Obviously', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--blue);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 1.3rem; letter-spacing: 0.05em; }
+    header a {text-decoration: none; color: white;}
+
+    main {
+      max-width: 1140px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .card + .card { margin-top: 1.25rem; }
+
+    .card-title {
+      font-size: 0.75rem;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type=text], input[type=number] {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    input[type=text]:focus, input[type=number]:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: white;
+    }
+
+    /* Color field: swatch trigger + hex text */
+    .color-field { display: flex; gap: 0.5rem; align-items: center; }
+    .cp-trigger {
+      width: 44px;
+      height: 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+      flex-shrink: 0;
+      background: #cccccc;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      padding: 0;
+    }
+    .cp-trigger:hover { border-color: var(--blue); }
+    .cp-trigger.active { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(28,43,112,0.15); }
+    .color-field input[type=text] { flex: 1; font-family: monospace; }
+
+    /* ── Custom Color Picker Panel ──────────────────────────────── */
+    #cpanel {
+      position: fixed;
+      z-index: 9999;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+      padding: 12px;
+      width: 236px;
+      display: none;
+      user-select: none;
+    }
+    #cpanel.open { display: block; }
+
+    .cp-sv {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      border-radius: 7px;
+      cursor: crosshair;
+      margin-bottom: 11px;
+      overflow: hidden;
+    }
+
+    .cp-sv::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent, #000);
+      border-radius: 7px;
+      pointer-events: none;
+    }
+
+    .cp-cursor {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 1.5px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.3);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .cp-hue-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: linear-gradient(to right,
+        #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+      cursor: pointer;
+      outline: none;
+      margin-bottom: 11px;
+      display: block;
+    }
+    .cp-hue-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid var(--blue);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+      cursor: grab;
+    }
+    .cp-hue-slider::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid var(--blue);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+      cursor: grab;
+    }
+
+    .cp-bottom {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .cp-preview-swatch {
+      width: 34px; height: 34px;
+      border-radius: 7px;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cp-hex-input {
+      flex: 1;
+      padding: 0.35rem 0.55rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      background: var(--bg);
+      color: var(--text);
+      width: 0; /* flex handles width */
+    }
+    .cp-hex-input:focus { outline: none; border-color: var(--blue); background: white; }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--blue); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-light); }
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.78rem; }
+    .btn-edit   { background: #e8eaf6; color: var(--blue); }
+    .btn-edit:hover { background: #c5cae9; }
+    .btn-save   { background: var(--success); color: white; }
+    .btn-save:hover { opacity: 0.85; }
+    .btn-delete { background: #fee2e2; color: var(--danger); }
+    .btn-delete:hover { background: #fecaca; }
+    .btn-cancel { background: #f3f4f6; color: var(--muted); }
+    .btn-cancel:hover { background: #e5e7eb; }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    /* ── CSV ──────────────────────────────────────────────────────── */
+    .csv-hint { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .csv-hint code { background: var(--bg); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.85em; }
+
+    .file-drop {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.85rem;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .file-drop:hover, .file-drop.drag-over { border-color: var(--blue); background: #eff1ff; color: var(--blue); }
+    .file-drop svg { margin: 0 auto 0.4rem; display: block; }
+    .file-drop input[type=file] { display: none; }
+
+    .csv-preview { margin-top: 1rem; }
+    .csv-preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.82rem; }
+    .csv-count { font-weight: 600; color: var(--blue); }
+    .csv-list { list-style: none; border: 1px solid var(--border); border-radius: 7px; max-height: 170px; overflow-y: auto; margin-bottom: 0.75rem; }
+    .csv-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.38rem 0.75rem; font-size: 0.82rem; border-bottom: 1px solid var(--border); }
+    .csv-list li:last-child { border-bottom: none; }
+    .mini-swatch { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.15); flex-shrink: 0; }
+    .csv-stock { color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+    /* ── Prizes table ─────────────────────────────────────────────── */
+    .right-col { display: flex; flex-direction: column; gap: 1rem; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .prize-count { color: var(--muted); font-size: 0.8rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    thead th {
+      background: var(--blue); color: white;
+      padding: 0.65rem 0.85rem; text-align: left;
+      font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    thead th:first-child { border-radius: 8px 0 0 0; }
+    thead th:last-child  { border-radius: 0 8px 0 0; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:hover { background: #f5f6ff; }
+    tbody tr:last-child { border-bottom: none; }
+    td { padding: 0.6rem 0.85rem; vertical-align: middle; }
+
+    .color-cell { display: flex; align-items: center; gap: 0.5rem; }
+    .color-swatch { width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid rgba(0,0,0,0.12); flex-shrink: 0; }
+    .color-hex { font-family: monospace; font-size: 0.8rem; color: var(--muted); }
+
+    .badge { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 99px; font-size: 0.75rem; }
+    .badge-ok  { background: #dcfce7; color: #166534; }
+    .badge-low { background: #fef9c3; color: #854d0e; }
+    .badge-out { background: #fee2e2; color: #991b1b; }
+
+    .id-cell { color: var(--muted); font-size: 0.78rem; }
+    .actions-cell { display: flex; gap: 0.35rem; }
+
+    td input[type=text], td input[type=number] { padding: 0.3rem 0.5rem; font-size: 0.85rem; }
+    td .color-field .cp-trigger { width: 34px; height: 32px; }
+    td .color-field input[type=text] { width: 90px; }
+
+    /* ── Checkboxes & selection ───────────────────────────────────── */
+    .cb-cell { width: 38px; padding: 0.6rem 0 0.6rem 0.85rem !important; }
+    th.cb-cell { padding: 0.65rem 0 0.65rem 0.85rem !important; }
+    input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--blue); cursor: pointer; display: block; }
+    tbody tr.selected { background: #e8eaf6 !important; }
+    tbody tr.selected:hover { background: #dde0f5 !important; }
+
+    /* ── Bulk delete bar ─────────────────────────────────────────── */
+    .bulk-bar {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      background: #e8eaf6;
+      border: 1px solid #c5cae9;
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.85rem;
+      color: var(--blue);
+    }
+    .bulk-bar.visible { display: flex; }
+    .bulk-bar span { flex: 1; font-weight: 600; }
+
+    /* ── Delete confirmation modal ───────────────────────────────── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15,20,50,0.45);
+      backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      padding: 1.75rem 1.75rem 1.5rem;
+      width: 340px;
+      max-width: calc(100vw - 2rem);
+      transform: scale(0.93) translateY(8px);
+      transition: transform 0.2s;
+    }
+    .modal-backdrop.open .modal { transform: scale(1) translateY(0); }
+    .modal-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: #fee2e2;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .modal-icon svg { color: var(--danger); }
+    .modal h3 { font-size: 1rem; margin-bottom: 0.4rem; }
+    .modal p  { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
+    .modal-actions {
+      display: flex; gap: 0.6rem; justify-content: flex-end;
+      margin-top: 1.4rem;
+    }
+    .modal-actions .btn { width: auto; }
+
+    /* ── Toast ────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: #1e293b; color: white;
+      padding: 0.7rem 1.2rem; border-radius: 8px;
+      font-size: 0.88rem; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.25s, opacity 0.25s;
+      z-index: 10000; pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/"><h1>Wheel of Fortune</h1></a>
+</header>
+
+<main>  
+  <!-- Left column -->
+  <div>
+    <div class="card">
+      <div class="card-title">Add Prize</div>
+      <form id="addForm">
+        <div class="form-group">
+          <label for="addName">Name</label>
+          <input id="addName" name="name" type="text" placeholder="e.g. T-shirt" required />
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-field">
+            <button type="button" class="cp-trigger" id="addSwatchBtn"></button>
+            <input id="addColorHex" name="color" type="text" placeholder="#cccccc" maxlength="7" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="addStock">Stock</label>
+          <input id="addStock" name="stock" type="number" min="0" value="1" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Add Prize</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Import CSV</div>
+      <p class="csv-hint">Columns: <code>name</code>, <code>color</code>, <code>stock</code> — header row optional</p>
+      <div class="file-drop" id="fileDrop">
+        <input type="file" id="csvInput" accept=".csv,text/csv" />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Click or drag a .csv file here
+      </div>
+      <div id="csvPreview" class="csv-preview" style="display:none">
+        <div class="csv-preview-header">
+          <span class="csv-count" id="csvCount"></span>
+          <button type="button" class="btn btn-sm btn-cancel" id="csvClear">Clear</button>
+        </div>
+        <ul id="csvList" class="csv-list"></ul>
+        <button type="button" class="btn btn-primary" id="csvImport">Import All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div class="right-col">
+    <div class="card">
+      <div class="table-header">
+        <div class="card-title" style="margin:0;padding:0;border:none">Prizes</div>
+        <span class="prize-count" id="prizeCount"></span>
+      </div>
+      <div class="bulk-bar" id="bulkBar">
+        <span id="bulkCount"></span>
+        <button class="btn btn-sm btn-delete" id="bulkDeleteBtn">Delete Selected</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="prizeTable">
+          <thead>
+            <tr>
+              <th class="cb-cell"><input type="checkbox" id="selectAll" title="Select all" /></th>
+              <th>ID</th><th>Name</th><th>Color</th><th>Stock</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Delete confirmation modal -->
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </div>
+    <h3>Delete prize?</h3>
+    <p id="deleteModalMsg">This will permanently remove the prize and cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="deleteCancelBtn">Cancel</button>
+      <button class="btn btn-delete" id="deleteConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom color picker panel (singleton) -->
+<div id="cpanel">
+  <div class="cp-sv" id="cpSv">
+    <div class="cp-cursor" id="cpCursor"></div>
+  </div>
+  <input type="range" class="cp-hue-slider" id="cpHue" min="0" max="359" step="1" value="0" />
+  <div class="cp-bottom">
+    <div class="cp-preview-swatch" id="cpPreview"></div>
+    <input type="text" class="cp-hex-input" id="cpHexInput" maxlength="7" placeholder="#cccccc" />
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Color conversion ──────────────────────────────────────────────────────
+  function hsvToHex(h, s, v) {
+    const i = Math.floor(h / 60) % 6;
+    const f = h / 60 - Math.floor(h / 60);
+    const p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+    const rgb = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]][i];
+    return '#' + rgb.map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToHsv(hex) {
+    hex = String(hex).replace(/^#/, '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    if (hex.length !== 6 || !/^[0-9a-fA-F]{6}$/.test(hex)) return [0, 0, 0.8];
+    const r = parseInt(hex.slice(0,2),16)/255;
+    const g = parseInt(hex.slice(2,4),16)/255;
+    const b = parseInt(hex.slice(4,6),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+    let h = 0;
+    if (d !== 0) {
+      if (max === r) h = ((g - b) / d + 6) % 6;
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return [Math.round(h), max === 0 ? 0 : d / max, max];
+  }
+
+  // Normalise any color string → #rrggbb (handles rgb(...) from style props)
+  function toHex(c) {
+    if (!c) return '#cccccc';
+    c = String(c).trim();
+    if (c.startsWith('rgb')) {
+      const m = c.match(/\d+/g);
+      if (m) return '#' + m.slice(0,3).map(n => (+n).toString(16).padStart(2,'0')).join('');
+    }
+    if (!c.startsWith('#')) c = '#' + c;
+    return c.length === 7 ? c : '#cccccc';
+  }
+
+  // ── Custom Color Picker ───────────────────────────────────────────────────
+  const CP = (() => {
+    const panel    = document.getElementById('cpanel');
+    const svEl     = document.getElementById('cpSv');
+    const cursor   = document.getElementById('cpCursor');
+    const hueSlider = document.getElementById('cpHue');
+    const preview  = document.getElementById('cpPreview');
+    const hexInput = document.getElementById('cpHexInput');
+
+    let H = 0, S = 0, V = 0.8;
+    let onChangeFn = null;
+    let activeTrigger = null;
+    let svDragging = false;
+
+    function render() {
+      // SV gradient: white→hue left-right; transparent→black top-bottom (::after overlay)
+      svEl.style.background = `linear-gradient(to right, #fff, hsl(${H},100%,50%))`;
+      cursor.style.left = (S * 100) + '%';
+      cursor.style.top  = ((1 - V) * 100) + '%';
+      hueSlider.value   = H;
+      const hex = hsvToHex(H, S, V);
+      preview.style.background = hex;
+      hexInput.value = hex;
+    }
+
+    function emit() {
+      render();
+      const hex = hsvToHex(H, S, V);
+      if (onChangeFn) onChangeFn(hex);
+    }
+
+    // Hue slider
+    hueSlider.addEventListener('input', () => { H = +hueSlider.value; emit(); });
+
+    // SV area drag
+    function pickSV(e) {
+      const rect = svEl.getBoundingClientRect();
+      S = Math.max(0, Math.min(1, (e.clientX - rect.left)  / rect.width));
+      V = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+      emit();
+    }
+    svEl.addEventListener('mousedown',  (e) => { svDragging = true; pickSV(e); e.preventDefault(); });
+    document.addEventListener('mousemove', (e) => { if (svDragging) pickSV(e); });
+    document.addEventListener('mouseup',   ()  => { svDragging = false; });
+    svEl.addEventListener('touchstart',  (e) => { svDragging = true; pickSV(e.touches[0]); }, { passive: true });
+    document.addEventListener('touchmove', (e) => { if (svDragging) pickSV(e.touches[0]); }, { passive: true });
+    document.addEventListener('touchend',  ()  => { svDragging = false; });
+
+    // Hex input inside picker panel
+    hexInput.addEventListener('input', () => {
+      const v = hexInput.value.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+        [H, S, V] = hexToHsv(v);
+        svEl.style.background = `linear-gradient(to right, #fff, hsl(${H},100%,50%))`;
+        cursor.style.left = (S * 100) + '%';
+        cursor.style.top  = ((1 - V) * 100) + '%';
+        hueSlider.value   = H;
+        preview.style.background = v;
+        if (onChangeFn) onChangeFn(v);
+      }
+    });
+
+    // Stop panel clicks from bubbling to the outside-click handler
+    panel.addEventListener('click', e => e.stopPropagation());
+    panel.addEventListener('mousedown', e => e.stopPropagation());
+
+    function setHex(hex) {
+      [H, S, V] = hexToHsv(hex);
+      render();
+    }
+
+    function show(triggerEl, hex, onChange) {
+      if (activeTrigger) activeTrigger.classList.remove('active');
+      activeTrigger = triggerEl;
+      activeTrigger.classList.add('active');
+      onChangeFn = onChange;
+      setHex(hex || '#cccccc');
+      panel.classList.add('open');
+
+      // Position below trigger, flip up if needed
+      const r = triggerEl.getBoundingClientRect();
+      panel.style.top  = '0';
+      panel.style.left = '0';
+      const pw = panel.offsetWidth, ph = panel.offsetHeight;
+      let top  = r.bottom + 6;
+      let left = r.left;
+      if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
+      if (top  + ph > window.innerHeight - 8) top  = r.top - ph - 6;
+      panel.style.top  = top  + 'px';
+      panel.style.left = left + 'px';
+    }
+
+    function hide() {
+      panel.classList.remove('open');
+      if (activeTrigger) { activeTrigger.classList.remove('active'); activeTrigger = null; }
+    }
+
+    function isOpen() { return panel.classList.contains('open'); }
+
+    // External hex update (from typing in the page's hex input, not picker's own input)
+    function updateFromHex(hex) {
+      if (!isOpen()) return;
+      [H, S, V] = hexToHsv(hex);
+      svEl.style.background = `linear-gradient(to right, #fff, hsl(${H},100%,50%))`;
+      cursor.style.left = (S * 100) + '%';
+      cursor.style.top  = ((1 - V) * 100) + '%';
+      hueSlider.value   = H;
+      preview.style.background = hex;
+      hexInput.value = hex;
+    }
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!isOpen()) return;
+      if (!e.target.closest('.cp-trigger')) hide();
+    });
+
+    return { show, hide, isOpen, updateFromHex };
+  })();
+
+  // ── Color field event delegation ──────────────────────────────────────────
+  // Trigger button clicked → show/toggle picker
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.cp-trigger');
+    if (!btn) return;
+    e.stopPropagation();
+
+    if (CP.isOpen()) { CP.hide(); return; }
+
+    const hexInput = btn.closest('.color-field').querySelector('input[type=text]');
+    CP.show(btn, hexInput.value || '#cccccc', (hex) => {
+      hexInput.value = hex;
+      btn.style.background = hex;
+    });
+  });
+
+  // Hex text input typed → update trigger swatch + picker if open
+  document.addEventListener('input', (e) => {
+    const input = e.target;
+    if (!input.matches('.color-field input[type=text]')) return;
+    const v = input.value.trim();
+    if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+    const trigger = input.closest('.color-field')?.querySelector('.cp-trigger');
+    if (trigger) trigger.style.background = v;
+    CP.updateFromHex(v);
+  });
+
+  // ── Initialise add form swatch ────────────────────────────────────────────
+  const addSwatchBtn  = document.getElementById('addSwatchBtn');
+  const addColorHex   = document.getElementById('addColorHex');
+  addSwatchBtn.style.background = '#cccccc';
+  addColorHex.value = '#cccccc';
+
+  // ── Delete modal ──────────────────────────────────────────────────────────
+  let deleteResolve = null;
+  const deleteModal      = document.getElementById('deleteModal');
+  const deleteModalMsg   = document.getElementById('deleteModalMsg');
+  const deleteCancelBtn  = document.getElementById('deleteCancelBtn');
+  const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+
+  function confirmDelete(name) {
+    return new Promise(resolve => {
+      deleteResolve = resolve;
+      deleteModalMsg.textContent = 'This will permanently remove "' + name + '" and cannot be undone.';
+      deleteModal.classList.add('open');
+      deleteConfirmBtn.focus();
+    });
+  }
+
+  function closeDeleteModal(result) {
+    deleteModal.classList.remove('open');
+    if (deleteResolve) { deleteResolve(result); deleteResolve = null; }
+  }
+
+  deleteCancelBtn.addEventListener('click',  () => closeDeleteModal(false));
+  deleteConfirmBtn.addEventListener('click', () => closeDeleteModal(true));
+  deleteModal.addEventListener('click', (e) => { if (e.target === deleteModal) closeDeleteModal(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && deleteModal.classList.contains('open')) closeDeleteModal(false); });
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = 'toast'; }, 3000);
+  }
+
+  // ── API helper ────────────────────────────────────────────────────────────
+  function api(path, opts = {}) {
+    opts.headers = Object.assign(opts.headers || {}, { 'Content-Type': 'application/json' });
+    return fetch(path, opts).then(async r => {
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'API error');
+      return r.json();
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function stockBadge(n) {
+    if (n === 0) return '<span class="badge badge-out">Out</span>';
+    if (n <= 2)  return '<span class="badge badge-low">' + n + '</span>';
+    return '<span class="badge badge-ok">' + n + '</span>';
+  }
+
+  // ── Prize table ───────────────────────────────────────────────────────────
+  async function load() {
+    const rows = await api('/api/admin/get-prizes');
+    const tbody = document.querySelector('#prizeTable tbody');
+    tbody.innerHTML = '';
+    document.getElementById('prizeCount').textContent =
+      rows.length + ' prize' + (rows.length !== 1 ? 's' : '');
+
+    rows.forEach((r, idx) => {
+      const hex = toHex(r.color);
+      const tr = document.createElement('tr');
+      tr.dataset.id = r.id;
+      tr.dataset.idx = idx;
+      tr.innerHTML =
+        '<td class="cb-cell"><input type="checkbox" class="row-cb" /></td>' +
+        '<td class="id-cell">#' + r.id + '</td>' +
+        '<td class="cell-name">' + escapeHtml(r.name) + '</td>' +
+        '<td class="cell-color">' +
+          '<div class="color-cell">' +
+            '<div class="color-swatch" style="background:' + escapeHtml(hex) + '"></div>' +
+            '<span class="color-hex">' + escapeHtml(hex) + '</span>' +
+          '</div>' +
+        '</td>' +
+        '<td class="cell-stock">' +
+          stockBadge(r.stock) +
+          '<span style="display:none">' + r.stock + '</span>' +
+        '</td>' +
+        '<td class="actions-cell">' +
+          '<button class="btn btn-sm btn-edit" data-action="edit">Edit</button>' +
+          '<button class="btn btn-sm btn-delete" data-action="delete">Delete</button>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+
+    // Reset selection state after reload
+    document.getElementById('selectAll').checked = false;
+    updateBulkBar();
+  }
+
+  // ── Add form ──────────────────────────────────────────────────────────────
+  document.getElementById('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name  = document.getElementById('addName').value.trim();
+    const color = addColorHex.value.trim() || '#cccccc';
+    const stock = Number(document.getElementById('addStock').value || 0);
+    try {
+      await api('/api/admin/prizes', { method: 'POST', body: JSON.stringify({ name, color, stock }) });
+      e.target.reset();
+      addColorHex.value = '#cccccc';
+      addSwatchBtn.style.background = '#cccccc';
+      CP.hide();
+      toast('Prize added!');
+      load();
+    } catch (err) { toast('Error: ' + err.message, true); }
+  });
+
+  // ── Table actions ─────────────────────────────────────────────────────────
+  document.querySelector('#prizeTable tbody').addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const tr     = btn.closest('tr');
+    const id     = tr.dataset.id;
+    const action = btn.dataset.action;
+
+    if (action === 'delete') {
+      const name = tr.querySelector('.cell-name').textContent;
+      const confirmed = await confirmDelete(name);
+      if (!confirmed) return;
+      try {
+        await api('/api/admin/prizes/' + id, { method: 'DELETE' });
+        toast('Prize deleted.');
+        load();
+      } catch (err) { toast('Error: ' + err.message, true); }
+
+    } else if (action === 'edit') {
+      CP.hide();
+      const name     = tr.querySelector('.cell-name').textContent;
+      const stockRaw = tr.querySelector('.cell-stock span').textContent;
+      const hex      = toHex(tr.querySelector('.color-swatch').style.backgroundColor || '#cccccc');
+
+      tr.querySelector('.cell-name').innerHTML =
+        '<input type="text" name="name" value="' + escapeHtml(name) + '" style="min-width:120px" />';
+
+      tr.querySelector('.cell-color').innerHTML =
+        '<div class="color-field">' +
+          '<button type="button" class="cp-trigger edit-swatch" style="background:' + escapeHtml(hex) + '"></button>' +
+          '<input type="text" class="edit-hex" value="' + escapeHtml(hex) + '" maxlength="7" />' +
+        '</div>';
+
+      tr.querySelector('.cell-stock').innerHTML =
+        '<input type="number" name="stock" value="' + escapeHtml(stockRaw) + '" min="0" style="width:70px" />';
+
+      tr.querySelector('.actions-cell').innerHTML =
+        '<button class="btn btn-sm btn-save"   data-action="save">Save</button>' +
+        '<button class="btn btn-sm btn-cancel" data-action="cancel">Cancel</button>';
+
+    } else if (action === 'save') {
+      const name  = tr.querySelector('input[name="name"]').value.trim();
+      const stock = Number(tr.querySelector('input[name="stock"]').value || 0);
+      const color = (tr.querySelector('.edit-hex')?.value || '#cccccc').trim();
+      try {
+        await api('/api/admin/prizes/' + id, { method: 'PUT', body: JSON.stringify({ name, color, stock }) });
+        CP.hide();
+        toast('Saved!');
+        load();
+      } catch (err) { toast('Error: ' + err.message, true); }
+
+    } else if (action === 'cancel') {
+      CP.hide();
+      load();
+    }
+  });
+
+  // ── CSV import ────────────────────────────────────────────────────────────
+  const fileDrop = document.getElementById('fileDrop');
+  const csvInput = document.getElementById('csvInput');
+  let csvData = [];
+
+  fileDrop.addEventListener('click', () => csvInput.click());
+  fileDrop.addEventListener('dragover',  (e) => { e.preventDefault(); fileDrop.classList.add('drag-over'); });
+  fileDrop.addEventListener('dragleave', ()  => fileDrop.classList.remove('drag-over'));
+  fileDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileDrop.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) parseCSV(e.dataTransfer.files[0]);
+  });
+  csvInput.addEventListener('change', () => { if (csvInput.files[0]) parseCSV(csvInput.files[0]); });
+
+  function parseCSV(file) {
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const lines = evt.target.result.trim().split(/\r?\n/);
+      csvData = [];
+      let start = 0;
+      const first = lines[0].toLowerCase();
+      if (first.includes('name') || first.includes('color') || first.includes('stock')) start = 1;
+      for (let i = start; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        if (!cols[0]) continue;
+        csvData.push({ name: cols[0], color: cols[1] || '#cccccc', stock: parseInt(cols[2], 10) || 1 });
+      }
+      renderCSVPreview();
+    };
+    reader.readAsText(file);
+  }
+
+  function renderCSVPreview() {
+    const preview = document.getElementById('csvPreview');
+    if (csvData.length === 0) { preview.style.display = 'none'; return; }
+    document.getElementById('csvCount').textContent =
+      csvData.length + ' prize' + (csvData.length !== 1 ? 's' : '') + ' ready to import';
+    const list = document.getElementById('csvList');
+    list.innerHTML = '';
+    csvData.forEach(p => {
+      const li = document.createElement('li');
+      li.innerHTML =
+        '<div class="mini-swatch" style="background:' + escapeHtml(p.color) + '"></div>' +
+        '<span>' + escapeHtml(p.name) + '</span>' +
+        '<span class="csv-stock">×' + p.stock + '</span>';
+      list.appendChild(li);
+    });
+    preview.style.display = '';
+  }
+
+  document.getElementById('csvClear').addEventListener('click', () => {
+    csvData = []; csvInput.value = '';
+    document.getElementById('csvPreview').style.display = 'none';
+  });
+
+  document.getElementById('csvImport').addEventListener('click', async () => {
+    if (!csvData.length) return;
+    const btn = document.getElementById('csvImport');
+    btn.disabled = true; btn.textContent = 'Importing…';
+    let ok = 0, fail = 0;
+    for (const prize of csvData) {
+      try { await api('/api/admin/prizes', { method: 'POST', body: JSON.stringify(prize) }); ok++; }
+      catch { fail++; }
+    }
+    csvData = []; csvInput.value = '';
+    document.getElementById('csvPreview').style.display = 'none';
+    btn.disabled = false; btn.textContent = 'Import All';
+    toast(ok + ' prize' + (ok !== 1 ? 's' : '') + ' imported' + (fail ? ', ' + fail + ' failed' : '') + '.');
+    load();
+  });
+
+  // ── Checkbox selection & bulk delete ─────────────────────────────────────
+  let lastCheckedIdx = -1;
+
+  function updateBulkBar() {
+    const checked = document.querySelectorAll('#prizeTable tbody .row-cb:checked');
+    const bar = document.getElementById('bulkBar');
+    const count = checked.length;
+    if (count > 0) {
+      document.getElementById('bulkCount').textContent =
+        count + ' prize' + (count !== 1 ? 's' : '') + ' selected';
+      bar.classList.add('visible');
+    } else {
+      bar.classList.remove('visible');
+    }
+    // Sync "select all" state
+    const all = document.querySelectorAll('#prizeTable tbody .row-cb');
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+      selectAll.checked = all.length > 0 && checked.length === all.length;
+      selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+    }
+  }
+
+  // Select-all checkbox
+  document.getElementById('prizeTable').addEventListener('change', (e) => {
+    if (e.target.id === 'selectAll') {
+      const checked = e.target.checked;
+      document.querySelectorAll('#prizeTable tbody .row-cb').forEach(cb => {
+        cb.checked = checked;
+        cb.closest('tr').classList.toggle('selected', checked);
+      });
+      updateBulkBar();
+    }
+  });
+
+  // Row checkboxes with shift-click range support
+  document.querySelector('#prizeTable tbody').addEventListener('click', (e) => {
+    if (!e.target.classList.contains('row-cb')) return;
+
+    const cb = e.target;
+    const tr = cb.closest('tr');
+    const idx = +tr.dataset.idx;
+
+    if (e.shiftKey && lastCheckedIdx !== -1) {
+      const rows = [...document.querySelectorAll('#prizeTable tbody tr')];
+      const lo = Math.min(lastCheckedIdx, idx);
+      const hi = Math.max(lastCheckedIdx, idx);
+      rows.forEach(r => {
+        const i = +r.dataset.idx;
+        if (i >= lo && i <= hi) {
+          r.querySelector('.row-cb').checked = cb.checked;
+          r.classList.toggle('selected', cb.checked);
+        }
+      });
+    } else {
+      tr.classList.toggle('selected', cb.checked);
+    }
+
+    lastCheckedIdx = idx;
+    updateBulkBar();
+  });
+
+  // Bulk delete button
+  document.getElementById('bulkDeleteBtn').addEventListener('click', async () => {
+    const checked = [...document.querySelectorAll('#prizeTable tbody .row-cb:checked')];
+    if (!checked.length) return;
+
+    const count = checked.length;
+    const confirmed = await confirmDelete(
+      count === 1
+        ? checked[0].closest('tr').querySelector('.cell-name').textContent
+        : count + ' prizes'
+    );
+    if (!confirmed) return;
+
+    const btn = document.getElementById('bulkDeleteBtn');
+    btn.disabled = true;
+    let ok = 0, fail = 0;
+    for (const cb of checked) {
+      const id = cb.closest('tr').dataset.id;
+      try { await api('/api/admin/prizes/' + id, { method: 'DELETE' }); ok++; }
+      catch { fail++; }
+    }
+    btn.disabled = false;
+    toast(ok + ' prize' + (ok !== 1 ? 's' : '') + ' deleted' + (fail ? ', ' + fail + ' failed' : '') + '.');
+    lastCheckedIdx = -1;
+    load();
+  });
+
+  load();
+</script>
+</body>
+</html>
